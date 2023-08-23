@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using OrderHandler.BusinessLogic.Services;
 using OrderHandler.DataAccess.Contexts;
 using OrderHandler.DomainCommons.DataModels;
+using OrderHandler.DomainCommons.Services.Interfaces;
+using OrderHandler.Server.Exstensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +36,11 @@ builder.Services.AddAuthentication()
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -62,5 +70,10 @@ app.UseAuthorization();
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+
+
+// Gives an instance/adds services to the endpoint url.
+app.MapEndpoints();
+
 
 app.Run();

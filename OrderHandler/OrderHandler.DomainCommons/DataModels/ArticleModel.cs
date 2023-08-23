@@ -21,4 +21,11 @@ public class ArticleModel
 
     [Required, Precision(precision: 11, scale: 2), MinLength(0)]
     public decimal UnitPrice { get; set; }
+
+    [Required]
+    public DateTime CreatedAt { get; set; }
+
+
+    [Required]
+    public DateTime LastUpdatedAt { get; set; }
 }

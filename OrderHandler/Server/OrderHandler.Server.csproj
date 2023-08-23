@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Client\OrderHandler.Client.csproj" />
+    <ProjectReference Include="..\OrderHandler.BusinessLogic\OrderHandler.BusinessLogic.csproj" />
     <ProjectReference Include="..\OrderHandler.DataAccess\OrderHandler.DataAccess.csproj" />
     <ProjectReference Include="..\OrderHandler.DomainCommons\OrderHandler.DomainCommons.csproj" />
   </ItemGroup>
@@ -31,9 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Endpoints\Handlers\" />
-    <Folder Include="Endpoints\Requests\" />
-    <Folder Include="Exstensions\" />
+    <Folder Include="Exstensions\EndpointsGrouped\" />
   </ItemGroup>
 
 </Project>
