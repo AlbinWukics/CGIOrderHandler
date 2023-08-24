@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OrderHandler.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialOrderHandlerSchema : Migration
+    public partial class InitalOrderHandlerSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

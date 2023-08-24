@@ -127,7 +127,7 @@ namespace OrderHandler.DataAccess.Migrations
             modelBuilder.Entity("OrderHandler.DomainCommons.DataModels.ArticleModel", b =>
                 {
                     b.HasOne("OrderHandler.DomainCommons.DataModels.ColorModel", "Color")
-                        .WithMany()
+                        .WithMany("Articles")
                         .HasForeignKey("ColorId");
 
                     b.Navigation("Color");
@@ -150,6 +150,11 @@ namespace OrderHandler.DataAccess.Migrations
                     b.Navigation("ArticleId");
 
                     b.Navigation("OrderId");
+                });
+
+            modelBuilder.Entity("OrderHandler.DomainCommons.DataModels.ColorModel", b =>
+                {
+                    b.Navigation("Articles");
                 });
 #pragma warning restore 612, 618
         }

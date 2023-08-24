@@ -2,7 +2,7 @@
 
 public enum OrderStatus
 {
-    New = 0,
+    NewOrder = 0,
     Processing = 1,
     AwaitingShipment = 2,
     Shipped = 3

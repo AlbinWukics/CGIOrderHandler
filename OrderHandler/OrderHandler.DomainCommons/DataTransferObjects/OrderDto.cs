@@ -16,7 +16,7 @@ public class OrderDto
 
 
     [Required]
-    public OrderStatus Status { get; set; } = OrderStatus.New;
+    public OrderStatus Status { get; set; } = OrderStatus.NewOrder;
 
 
     [Required]

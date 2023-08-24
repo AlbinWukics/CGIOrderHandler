@@ -9,7 +9,9 @@ public static class ArticleGroupBuilderExtensions
         builder.MediatePost<AddArticleRequest>("/");
         builder.MediateGet<GetArticleByIdRequest>("/{id}");
         builder.MediateGet<GetAllArticlesRequest>("/");
+        builder.MediateGet<GetManyByArticleNumberRequest>("/articleNumber/{articleNumber}");
         builder.MediatePut<UpdateArticleRequest>("/");
+        builder.MediateDelete<RemoveArticleRequest>("/{id}");
 
         return builder;
     }

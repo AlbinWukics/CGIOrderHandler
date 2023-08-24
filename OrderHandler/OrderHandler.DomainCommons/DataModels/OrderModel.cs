@@ -11,6 +11,10 @@ public class OrderModel
     public ICollection<OrderRowModel> OrderRows = new List<OrderRowModel>();
 
 
+    [Required, MinLength(0)]
+    public int OrderNumber { get; set; }
+
+
     [Required, MaxLength(length: 50)]
     public string CustomerName { get; set; } = string.Empty;
 

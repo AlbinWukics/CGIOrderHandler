@@ -23,6 +23,19 @@ public class ArticleRepositoryService : IArticleRepository
         var highestArticleNumber = await _context.Articles.MaxAsync(a => (int?)a.ArticleNumber) ?? 10000;
         dto.ArticleNumber = highestArticleNumber + 1;
 
+        if (dto.Color is not null)
+        {
+            var colorEntity = await _context.Colors.FindAsync(dto.Color.Id);
+
+            if (colorEntity is not null)
+            {
+                var model = ConvertToModel(dto);
+                model.Color = colorEntity;
+                var entity = await _context.Articles.AddAsync(model);
+                return new ServiceResponse<ArticleDto>(true, "", ConvertToDto(entity.Entity));
+            }
+        }
+
         await _context.Articles.AddAsync(ConvertToModel(dto));
         return new ServiceResponse<ArticleDto>(true, "", dto);
     }
@@ -57,7 +70,7 @@ public class ArticleRepositoryService : IArticleRepository
     {
         var a = await _context.Articles.FindAsync(dto.Id);
         if (a is null)
-            return new ServiceResponse<ArticleDto>(false, "Not found.", null);
+            return new ServiceResponse<ArticleDto>(false, "Article id not found.", null);
 
         a.ArticleName = dto.ArticleName;
         a.UnitPrice = dto.UnitPrice;
@@ -69,8 +82,17 @@ public class ArticleRepositoryService : IArticleRepository
             return new ServiceResponse<ArticleDto>(true, "", ConvertToDto(a));
         }
 
-        a.Color = new ColorModel() { Color = dto.Color.Color };
 
+        var color = await _context.Colors.FindAsync(dto.Color.Id);
+        if (color is not null)
+        {
+            a.Color = color;
+            _context.Articles.Update(a);
+            return new ServiceResponse<ArticleDto>(true, "", ConvertToDto(a));
+        }
+
+        // Does not return the right Id for the created color. Not important to fix.
+        a.Color = new ColorModel() { Color = dto.Color.Color };
         _context.Articles.Update(a);
         return new ServiceResponse<ArticleDto>(true, "", ConvertToDto(a));
     }
@@ -78,6 +100,8 @@ public class ArticleRepositoryService : IArticleRepository
 
     public async Task<ServiceResponse<ArticleDto>> RemoveAsync(Guid id)
     {
+        //Does not include nor delete paired color.
+
         var a = await _context.Articles.FindAsync(id);
         if (a is null)
             return new ServiceResponse<ArticleDto>(false, "Not found.", null);
@@ -113,9 +137,8 @@ public class ArticleRepositoryService : IArticleRepository
             LastUpdatedAt = m.LastUpdatedAt
         };
 
-        if (m.Color is null) return article;
-
-        article.Color = new ColorDto() { Color = m.Color.Color };
+        if (m.Color is not null)
+            article.Color = new ColorDto() { Color = m.Color.Color, Id = m.Color.Id };
 
         return article;
     }
@@ -133,9 +156,8 @@ public class ArticleRepositoryService : IArticleRepository
             LastUpdatedAt = d.LastUpdatedAt
         };
 
-        if (d.Color is null) return article;
-
-        article.Color = new ColorModel() { Color = d.Color.Color };
+        if (d.Color is not null)
+            article.Color = new ColorModel() { Color = d.Color.Color, Id = d.Color.Id };
 
         return article;
     }

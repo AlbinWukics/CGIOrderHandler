@@ -8,6 +8,9 @@ public class ColorModel
     public Guid Id { get; set; }
 
 
+    public ICollection<ArticleModel> Articles { get; set; } = new List<ArticleModel>();
+
+
     [Required, MaxLength(length: 50)]
     public string Color { get; set; } = string.Empty;
 }
