@@ -11,6 +11,10 @@ public class OrderDto
     public ICollection<OrderRowDto> OrderRows = new List<OrderRowDto>();
 
 
+    [Required, MinLength(0)]
+    public int OrderNumber { get; set; }
+
+
     [Required, MaxLength(length: 50)]
     public string CustomerName { get; set; } = null!;
 

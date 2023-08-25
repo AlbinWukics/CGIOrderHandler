@@ -17,6 +17,7 @@ public class UnitOfWork : IUnitOfWork
     {
         _ctx = ctx;
         ArticleRepository = new ArticleRepositoryService(_ctx);
+        OrderRepository = new OrderRepositoryService(_ctx);
     }
 
 

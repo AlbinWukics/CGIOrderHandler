@@ -12,7 +12,7 @@ using OrderHandler.DataAccess.Contexts;
 namespace OrderHandler.DataAccess.Migrations
 {
     [DbContext(typeof(OrderHandlerContext))]
-    [Migration("20230824130929_InitalOrderHandlerSchema")]
+    [Migration("20230825065412_InitalOrderHandlerSchema")]
     partial class InitalOrderHandlerSchema
     {
         /// <inheritdoc />
@@ -91,6 +91,9 @@ namespace OrderHandler.DataAccess.Migrations
 
                     b.Property<DateTime>("LastUpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("OrderNumber")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

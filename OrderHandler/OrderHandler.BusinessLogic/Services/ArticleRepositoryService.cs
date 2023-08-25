@@ -10,12 +10,14 @@ namespace OrderHandler.BusinessLogic.Services;
 
 public class ArticleRepositoryService : IArticleRepository
 {
+    #region Fields & Ctor
     private readonly OrderHandlerContext _context;
 
     public ArticleRepositoryService(OrderHandlerContext context)
     {
         _context = context;
     }
+    #endregion
 
 
     public async Task<ServiceResponse<ArticleDto>> AddAsync(ArticleDto dto)
@@ -70,7 +72,7 @@ public class ArticleRepositoryService : IArticleRepository
     {
         var a = await _context.Articles.FindAsync(dto.Id);
         if (a is null)
-            return new ServiceResponse<ArticleDto>(false, "Article id not found.", null);
+            return new ServiceResponse<ArticleDto>(false, "Article not found.", null);
 
         a.ArticleName = dto.ArticleName;
         a.UnitPrice = dto.UnitPrice;
