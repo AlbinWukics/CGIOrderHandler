@@ -114,13 +114,13 @@ public class OrderRepositoryService : IOrderRepository
             Id = x.Id,
             AmountOfArticles = x.AmountOfArticles,
             RowNumber = x.RowNumber,
-            ArticleId = new ArticleDto()
+            Article = new ArticleDto()
             {
-                Id = x.ArticleId.Id
+                Id = x.Article.Id
             },
-            OrderId = new OrderDto()
+            Order = new OrderDto()
             {
-                Id = x.OrderId.Id
+                Id = x.Order.Id
             }
         }).ToList();
 
@@ -147,13 +147,13 @@ public class OrderRepositoryService : IOrderRepository
             Id = x.Id,
             AmountOfArticles = x.AmountOfArticles,
             RowNumber = x.RowNumber,
-            ArticleId = new ArticleModel()
+            Article = new ArticleModel()
             {
-                Id = x.ArticleId.Id
+                Id = x.Article.Id
             },
-            OrderId = new OrderModel()
+            Order = new OrderModel()
             {
-                Id = x.OrderId.Id
+                Id = x.Order.Id
             }
         }).ToList();
 

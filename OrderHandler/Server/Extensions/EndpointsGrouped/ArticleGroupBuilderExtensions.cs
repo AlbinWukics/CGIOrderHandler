@@ -1,6 +1,6 @@
 ﻿using OrderHandler.Server.Endpoints.Requests.Article;
 
-namespace OrderHandler.Server.Exstensions.EndpointsGrouped;
+namespace OrderHandler.Server.Extensions.EndpointsGrouped;
 
 public static class ArticleGroupBuilderExtensions
 {

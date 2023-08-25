@@ -7,10 +7,10 @@ public class OrderRowDto
     public Guid Id { get; set; } = Guid.NewGuid();
 
 
-    public OrderDto OrderId { get; set; } = null!;
+    public OrderDto Order { get; set; } = null!;
 
 
-    public ArticleDto ArticleId { get; set; } = null!;
+    public ArticleDto Article { get; set; } = null!;
 
 
     [Required, MinLength(0)]

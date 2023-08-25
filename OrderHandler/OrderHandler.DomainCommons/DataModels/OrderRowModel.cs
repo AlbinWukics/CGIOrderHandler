@@ -7,10 +7,10 @@ public class OrderRowModel
     public Guid Id { get; set; }
 
 
-    public OrderModel OrderId { get; set; } = null!;
+    public OrderModel Order { get; set; } = null!;
 
 
-    public ArticleModel ArticleId { get; set; } = null!;
+    public ArticleModel Article { get; set; } = null!;
 
 
     [Required, MinLength(0)]

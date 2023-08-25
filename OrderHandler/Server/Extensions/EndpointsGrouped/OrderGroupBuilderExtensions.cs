@@ -1,6 +1,6 @@
 ﻿using OrderHandler.Server.Endpoints.Requests.Order;
 
-namespace OrderHandler.Server.Exstensions.EndpointsGrouped;
+namespace OrderHandler.Server.Extensions.EndpointsGrouped;
 
 public static class OrderGroupBuilderExtensions
 {

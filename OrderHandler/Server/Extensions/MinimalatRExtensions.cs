@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using OrderHandler.Server.Endpoints.Requests;
 
-namespace OrderHandler.Server.Exstensions;
+namespace OrderHandler.Server.Extensions;
 
 public static class MinimalatRExtensions
 {

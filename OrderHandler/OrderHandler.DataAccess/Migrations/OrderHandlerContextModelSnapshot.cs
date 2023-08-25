@@ -138,21 +138,21 @@ namespace OrderHandler.DataAccess.Migrations
 
             modelBuilder.Entity("OrderHandler.DomainCommons.DataModels.OrderRowModel", b =>
                 {
-                    b.HasOne("OrderHandler.DomainCommons.DataModels.ArticleModel", "ArticleId")
+                    b.HasOne("OrderHandler.DomainCommons.DataModels.ArticleModel", "Article")
                         .WithMany()
                         .HasForeignKey("ArticleIdId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OrderHandler.DomainCommons.DataModels.OrderModel", "OrderId")
+                    b.HasOne("OrderHandler.DomainCommons.DataModels.OrderModel", "Order")
                         .WithMany()
                         .HasForeignKey("OrderIdId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ArticleId");
+                    b.Navigation("Article");
 
-                    b.Navigation("OrderId");
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("OrderHandler.DomainCommons.DataModels.ColorModel", b =>

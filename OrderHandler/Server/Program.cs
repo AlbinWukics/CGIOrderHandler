@@ -4,7 +4,7 @@ using OrderHandler.BusinessLogic.Services;
 using OrderHandler.DataAccess.Contexts;
 using OrderHandler.DomainCommons.DataModels;
 using OrderHandler.DomainCommons.Services.Interfaces;
-using OrderHandler.Server.Exstensions;
+using OrderHandler.Server.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
