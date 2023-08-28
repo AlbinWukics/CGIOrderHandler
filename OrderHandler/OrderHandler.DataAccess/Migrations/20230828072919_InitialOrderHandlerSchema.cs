@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OrderHandler.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class InitalOrderHandlerSchema : Migration
+    public partial class InitialOrderHandlerSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -66,8 +66,8 @@ namespace OrderHandler.DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderIdId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ArticleIdId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ArticleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RowNumber = table.Column<int>(type: "int", nullable: false),
                     AmountOfArticles = table.Column<int>(type: "int", nullable: false)
                 },
@@ -75,14 +75,14 @@ namespace OrderHandler.DataAccess.Migrations
                 {
                     table.PrimaryKey("PK_OrderRows", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OrderRows_Articles_ArticleIdId",
-                        column: x => x.ArticleIdId,
+                        name: "FK_OrderRows_Articles_ArticleId",
+                        column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrderRows_Orders_OrderIdId",
-                        column: x => x.OrderIdId,
+                        name: "FK_OrderRows_Orders_OrderId",
+                        column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -94,14 +94,14 @@ namespace OrderHandler.DataAccess.Migrations
                 column: "ColorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderRows_ArticleIdId",
+                name: "IX_OrderRows_ArticleId",
                 table: "OrderRows",
-                column: "ArticleIdId");
+                column: "ArticleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderRows_OrderIdId",
+                name: "IX_OrderRows_OrderId",
                 table: "OrderRows",
-                column: "OrderIdId");
+                column: "OrderId");
         }
 
         /// <inheritdoc />

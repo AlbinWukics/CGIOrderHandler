@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderHandler.Client", "Orde
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderHandler.DomainCommons", "OrderHandler\OrderHandler.DomainCommons\OrderHandler.DomainCommons.csproj", "{839134CC-FC12-4270-9DC1-2E212471F694}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderHandler.DataAccess", "OrderHandler\OrderHandler.DataAccess\OrderHandler.DataAccess.csproj", "{DC479BBB-8972-41D1-A62D-4F17848A2557}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderHandler.DataAccess", "OrderHandler\OrderHandler.DataAccess\OrderHandler.DataAccess.csproj", "{DC479BBB-8972-41D1-A62D-4F17848A2557}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderHandler.BusinessLogic", "OrderHandler\OrderHandler.BusinessLogic\OrderHandler.BusinessLogic.csproj", "{74B08E1F-8953-43AE-88A8-92F888CD5F24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderHandler.BusinessLogic", "OrderHandler\OrderHandler.BusinessLogic\OrderHandler.BusinessLogic.csproj", "{74B08E1F-8953-43AE-88A8-92F888CD5F24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

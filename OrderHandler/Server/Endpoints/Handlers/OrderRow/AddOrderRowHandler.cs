@@ -16,6 +16,12 @@ public class AddOrderRowHandler : IRequestHandler<AddOrderRowRequest, IResult>
 
     public async Task<IResult> Handle(AddOrderRowRequest request, CancellationToken cancellationToken)
     {
-        
+        var response = await _unitOfWork.OrderRowRepository.AddAsync(request.OrderRow);
+
+        if (!response.Success || response.Data is null)
+            return Results.NotFound();
+
+        await _unitOfWork.SaveAsync();
+        return Results.Ok(response.Data);
     }
 }

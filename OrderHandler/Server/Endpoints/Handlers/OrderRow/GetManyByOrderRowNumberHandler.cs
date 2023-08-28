@@ -15,6 +15,11 @@ public class GetManyByOrderRowNumberHandler : IRequestHandler<GetManyByOrderRowN
 
     public async Task<IResult> Handle(GetManyByOrderRowNumberRequest request, CancellationToken cancellationToken)
     {
-        
+        var response = await _unitOfWork.OrderRowRepository.GetManyByOrderRowNumber(request.OrderRowNumber);
+
+        if (!response.Success || response.Data is null)
+            return Results.NotFound();
+
+        return Results.Ok(response.Data);
     }
 }

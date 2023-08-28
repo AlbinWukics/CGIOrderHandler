@@ -18,7 +18,7 @@ public class AddArticleHandler : IRequestHandler<AddArticleRequest, IResult>
         var response = await _unitOfWork.ArticleRepository.AddAsync(request.Article);
 
         if (!response.Success || response.Data is null)
-            return Results.BadRequest();
+            return Results.NotFound();
 
         await _unitOfWork.SaveAsync();
         return Results.Ok(response.Data);

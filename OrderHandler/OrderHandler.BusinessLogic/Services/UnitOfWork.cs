@@ -8,7 +8,6 @@ public class UnitOfWork : IUnitOfWork
     private readonly OrderHandlerContext _ctx;
 
     public IArticleRepository ArticleRepository { get; }
-    public IColorRepository ColorRepository { get; }
     public IOrderRepository OrderRepository { get; }
     public IOrderRowRepository OrderRowRepository { get; }
 
@@ -18,6 +17,7 @@ public class UnitOfWork : IUnitOfWork
         _ctx = ctx;
         ArticleRepository = new ArticleRepositoryService(_ctx);
         OrderRepository = new OrderRepositoryService(_ctx);
+        OrderRowRepository = new OrderRowRepositoryService(_ctx);
     }
 
 

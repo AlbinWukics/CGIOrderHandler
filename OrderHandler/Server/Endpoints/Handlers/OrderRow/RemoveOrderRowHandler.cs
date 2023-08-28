@@ -15,6 +15,13 @@ public class RemoveOrderRowHandler : IRequestHandler<RemoveOrderRowRequest, IRes
 
     public async Task<IResult> Handle(RemoveOrderRowRequest request, CancellationToken cancellationToken)
     {
+        var response = await _unitOfWork.OrderRowRepository.RemoveAsync(request.Id);
+
+        if (!response.Success || response.Data is null)
+            return Results.NotFound();
+
+        await _unitOfWork.SaveAsync();
+        return Results.Ok(response.Data);
 
     }
 }

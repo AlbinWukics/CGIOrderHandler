@@ -13,5 +13,7 @@ public static class OrderRowGroupBuilderExtensions
         builder.MediateGet<GetManyByOrderRowNumberRequest>("/orderRowNumber/{orderRowNumber}");
         builder.MediatePut<UpdateOrderRowRequest>("/");
         builder.MediateDelete<RemoveOrderRowRequest>("/{id}");
+
+        return builder;
     }
 }

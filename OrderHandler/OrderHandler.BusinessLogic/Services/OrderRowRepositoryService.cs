@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Immutable;
+using Microsoft.EntityFrameworkCore;
 using OrderHandler.DataAccess.Contexts;
 using OrderHandler.DomainCommons.DataModels;
 using OrderHandler.DomainCommons.DataTransferObjects;
@@ -22,35 +23,94 @@ public class OrderRowRepositoryService : IOrderRowRepository
         var highestRowNumber = await _ctx.OrderRows.MaxAsync(a => (int?)a.RowNumber) ?? 10000;
         dto.RowNumber = highestRowNumber + 1;
 
-        var
+        var order = await _ctx.Orders.FindAsync(dto.Order.Id);
+        if (order is null)
+            return new ServiceResponse<OrderRowDto>(false, "Fk order not found", null);
 
-        await _ctx.OrderRows.AddAsync(ConvertToModel(dto));
-        return new ServiceResponse<OrderRowDto>(true, "", dto);
+        var article = await _ctx.Articles.FindAsync(dto.Article.Id);
+        if (article is null)
+            return new ServiceResponse<OrderRowDto>(false, "Fk article not found", null);
+
+        var model = ConvertToModel(dto);
+        model.Order = order;
+        model.Article = article;
+
+        await _ctx.OrderRows.AddAsync(model);
+        return new ServiceResponse<OrderRowDto>(true, "", ConvertToDto(model));
     }
 
     public async Task<ServiceResponse<OrderRowDto>> GetByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        var orderRow = await _ctx.OrderRows
+            .Include(x => x.Article)
+            .Include(x => x.Order)
+            .FirstOrDefaultAsync(x => x.Id.Equals(id));
+
+        if (orderRow is null)
+            return new ServiceResponse<OrderRowDto>(false, "OrderRow not found", null);
+
+        return new ServiceResponse<OrderRowDto>(true, "", ConvertToDto(orderRow));
     }
 
     public async Task<ServiceResponse<IReadOnlyCollection<OrderRowDto>>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        var orderRows = await _ctx.OrderRows
+            .Include(x => x.Article)
+            .Include(x => x.Order)
+            .ToListAsync();
+
+        if (!orderRows.Any())
+            return new ServiceResponse<IReadOnlyCollection<OrderRowDto>>(false, "None found.", null);
+
+        return new ServiceResponse<IReadOnlyCollection<OrderRowDto>>(true, "",
+            orderRows.Select(ConvertToDto).ToImmutableList());
     }
 
     public async Task<ServiceResponse<OrderRowDto>> UpdateAsync(OrderRowDto dto)
     {
-        throw new NotImplementedException();
+        var orderRow = await _ctx.OrderRows
+            .Include(x => x.Article)
+            .Include(x => x.Order)
+            .FirstOrDefaultAsync(x => x.Id.Equals(dto.Id));
+
+        if (orderRow is null)
+            return new ServiceResponse<OrderRowDto>(false, "Not found", null);
+
+        orderRow.AmountOfArticles = dto.AmountOfArticles;
+        orderRow.Article.Id = dto.Article.Id;
+        orderRow.Order.Id = dto.Order.Id;
+
+        _ctx.Update(orderRow);
+        return new ServiceResponse<OrderRowDto>(true, "", ConvertToDto(orderRow));
     }
 
     public async Task<ServiceResponse<OrderRowDto>> RemoveAsync(Guid id)
     {
-        throw new NotImplementedException();
+        var orderRow = await _ctx.OrderRows
+            .Include(x => x.Article)
+            .Include(x => x.Order)
+            .FirstOrDefaultAsync(x => x.Id.Equals(id));
+        if (orderRow is null)
+            return new ServiceResponse<OrderRowDto>(false, "Not found", null);
+
+        _ctx.OrderRows.Remove(orderRow);
+        return new ServiceResponse<OrderRowDto>(true, "", ConvertToDto(orderRow));
     }
 
     public async Task<ServiceResponse<IReadOnlyCollection<OrderRowDto>>> GetManyByOrderRowNumber(int orderRowNumber)
     {
-        throw new NotImplementedException();
+        var orderRows = await _ctx.OrderRows
+            .Include(x => x.Article)
+            .Include(x => x.Order)
+            .Where(x => x.Id.ToString()
+            .Contains(orderRowNumber.ToString()))
+            .ToListAsync();
+
+        if (!orderRows.Any())
+            return new ServiceResponse<IReadOnlyCollection<OrderRowDto>>(false, "None found.", null);
+
+        return new ServiceResponse<IReadOnlyCollection<OrderRowDto>>(true, "",
+            orderRows.Select(ConvertToDto).ToImmutableList());
     }
 
 

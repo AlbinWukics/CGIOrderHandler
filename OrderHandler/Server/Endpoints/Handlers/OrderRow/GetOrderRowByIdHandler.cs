@@ -15,6 +15,12 @@ public class GetOrderRowByIdHandler : IRequestHandler<GetOrderRowByIdRequest, IR
 
     public async Task<IResult> Handle(GetOrderRowByIdRequest request, CancellationToken cancellationToken)
     {
-        
+        var response = await _unitOfWork.OrderRowRepository.GetByIdAsync(request.Id);
+
+        if (!response.Success || response.Data is null)
+            return Results.NotFound();
+
+        return Results.Ok(response.Data);
+
     }
 }

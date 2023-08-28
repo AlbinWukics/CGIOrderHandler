@@ -109,10 +109,10 @@ namespace OrderHandler.DataAccess.Migrations
                     b.Property<int>("AmountOfArticles")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("ArticleIdId")
+                    b.Property<Guid>("ArticleId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("OrderIdId")
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("RowNumber")
@@ -120,9 +120,9 @@ namespace OrderHandler.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArticleIdId");
+                    b.HasIndex("ArticleId");
 
-                    b.HasIndex("OrderIdId");
+                    b.HasIndex("OrderId");
 
                     b.ToTable("OrderRows");
                 });
@@ -140,13 +140,13 @@ namespace OrderHandler.DataAccess.Migrations
                 {
                     b.HasOne("OrderHandler.DomainCommons.DataModels.ArticleModel", "Article")
                         .WithMany()
-                        .HasForeignKey("ArticleIdId")
+                        .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("OrderHandler.DomainCommons.DataModels.OrderModel", "Order")
                         .WithMany()
-                        .HasForeignKey("OrderIdId")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

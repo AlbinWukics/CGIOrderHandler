@@ -19,7 +19,7 @@ public class GetArticleByIdHandler : IRequestHandler<GetArticleByIdRequest, IRes
         var response = await _unitOfWork.ArticleRepository.GetByIdAsync(request.Id);
 
         if (!response.Success || response.Data is null)
-            return Results.BadRequest();
+            return Results.NotFound();
 
         return Results.Ok(response.Data);
     }

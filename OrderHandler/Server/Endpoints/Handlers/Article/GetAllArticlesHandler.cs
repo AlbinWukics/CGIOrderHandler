@@ -20,7 +20,7 @@ public class GetAllArticlesHandler : IRequestHandler<GetAllArticlesRequest, IRes
         var response = await _unitOfWork.ArticleRepository.GetAllAsync();
 
         if (!response.Success)
-            return Results.BadRequest();
+            return Results.NotFound();
 
         return Results.Ok(response.Data);
     }

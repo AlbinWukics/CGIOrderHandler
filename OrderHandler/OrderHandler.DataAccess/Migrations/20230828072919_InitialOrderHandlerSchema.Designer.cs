@@ -12,8 +12,8 @@ using OrderHandler.DataAccess.Contexts;
 namespace OrderHandler.DataAccess.Migrations
 {
     [DbContext(typeof(OrderHandlerContext))]
-    [Migration("20230825065412_InitalOrderHandlerSchema")]
-    partial class InitalOrderHandlerSchema
+    [Migration("20230828072919_InitialOrderHandlerSchema")]
+    partial class InitialOrderHandlerSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -112,10 +112,10 @@ namespace OrderHandler.DataAccess.Migrations
                     b.Property<int>("AmountOfArticles")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("ArticleIdId")
+                    b.Property<Guid>("ArticleId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("OrderIdId")
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("RowNumber")
@@ -123,9 +123,9 @@ namespace OrderHandler.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArticleIdId");
+                    b.HasIndex("ArticleId");
 
-                    b.HasIndex("OrderIdId");
+                    b.HasIndex("OrderId");
 
                     b.ToTable("OrderRows");
                 });
@@ -141,21 +141,21 @@ namespace OrderHandler.DataAccess.Migrations
 
             modelBuilder.Entity("OrderHandler.DomainCommons.DataModels.OrderRowModel", b =>
                 {
-                    b.HasOne("OrderHandler.DomainCommons.DataModels.ArticleModel", "ArticleId")
+                    b.HasOne("OrderHandler.DomainCommons.DataModels.ArticleModel", "Article")
                         .WithMany()
-                        .HasForeignKey("ArticleIdId")
+                        .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OrderHandler.DomainCommons.DataModels.OrderModel", "OrderId")
+                    b.HasOne("OrderHandler.DomainCommons.DataModels.OrderModel", "Order")
                         .WithMany()
-                        .HasForeignKey("OrderIdId")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ArticleId");
+                    b.Navigation("Article");
 
-                    b.Navigation("OrderId");
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("OrderHandler.DomainCommons.DataModels.ColorModel", b =>

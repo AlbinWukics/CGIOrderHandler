@@ -19,7 +19,7 @@ public class UpdateArticleHandler : IRequestHandler<UpdateArticleRequest, IResul
         var response = await _unitOfWork.ArticleRepository.UpdateAsync(request.Article);
 
         if (!response.Success || response.Data is null)
-            return Results.BadRequest();
+            return Results.NotFound();
 
         await _unitOfWork.SaveAsync();
         return Results.Ok(response.Data);
