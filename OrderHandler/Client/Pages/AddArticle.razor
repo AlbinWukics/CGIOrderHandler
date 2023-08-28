@@ -1,19 +1,46 @@
 ﻿@page "/addArticle"
+@using OrderHandler.DomainCommons.DataTransferObjects
+@using OrderHandler.DomainCommons.Services
+@using OrderHandler.Client.HttpClient
+@inject PublicClient _client;
 
 <PageTitle>CGI Order Handler</PageTitle>
 
 <h1 class="text-center">Add Article</h1>
 
-@* <EditForm>
+<EditForm Model="Article" OnValidSubmit="AddArticleToDb">
     <DataAnnotationsValidator></DataAnnotationsValidator>
     <div style="width: 20vw">
         <p>
             <label class="form-label">Article name</label>
-            <InputText class="form-control" @bind-value=""></InputText>
+            <InputText class="form-control" @bind-Value="Article.ArticleName"></InputText>
+        </p>
+     @*    <p>
+            <label class="form-label">Article price</label>
+            <InputNumber TValue="decimal" class="form-control" @bind-Value="Article.UnitPrice"></InputNumber>
+        </p> *@
+        <p>
+            <label class="form-label">Article color</label>
+            <InputText class="form-control" @bind-Value="Article.Color.Color"></InputText>
         </p>
     </div>
-</EditForm> *@
+    <button class="btn btn-outline-primary">Add Article</button>
+    <ValidationSummary></ValidationSummary>
+</EditForm>
 
 @code {
-    
+    private ArticleDto Article { get; set; } = new ArticleDto();
+
+    protected override Task OnInitializedAsync()
+    {
+        Article.Color = new ColorDto();
+        return base.OnInitializedAsync();
+    }
+
+    private async Task AddArticleToDb()
+    {
+        var response = await _client.Client.PostAsJsonAsync("/article/", Article);
+        var results = await response.Content.ReadFromJsonAsync<ServiceResponse<ArticleDto>>();
+    }
+
 }
