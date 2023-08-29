@@ -21,6 +21,6 @@ public class GetManyByArticleNumberHandler : IRequestHandler<GetManyByArticleNum
         if (!response.Success)
             return Results.NotFound();
 
-        return Results.Ok(response.Data);
+        return Results.Ok(response);
     }
 }

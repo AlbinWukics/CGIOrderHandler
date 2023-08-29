@@ -21,6 +21,6 @@ public class AddArticleHandler : IRequestHandler<AddArticleRequest, IResult>
             return Results.NotFound();
 
         await _unitOfWork.SaveAsync();
-        return Results.Ok(response.Data);
+        return Results.Ok(response);
     }
 }

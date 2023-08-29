@@ -21,6 +21,6 @@ public class GetArticleByIdHandler : IRequestHandler<GetArticleByIdRequest, IRes
         if (!response.Success || response.Data is null)
             return Results.NotFound();
 
-        return Results.Ok(response.Data);
+        return Results.Ok(response);
     }
 }

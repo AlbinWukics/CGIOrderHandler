@@ -1,4 +1,5 @@
 ﻿@page "/addArticle"
+
 @using OrderHandler.DomainCommons.DataTransferObjects
 @using OrderHandler.DomainCommons.Services
 @using OrderHandler.Client.HttpClient
@@ -6,41 +7,140 @@
 
 <PageTitle>CGI Order Handler</PageTitle>
 
-<h1 class="text-center">Add Article</h1>
+<h1>Add Article</h1>
 
-<EditForm Model="Article" OnValidSubmit="AddArticleToDb">
-    <DataAnnotationsValidator></DataAnnotationsValidator>
-    <div style="width: 20vw">
-        <p>
-            <label class="form-label">Article name</label>
-            <InputText class="form-control" @bind-Value="Article.ArticleName"></InputText>
-        </p>
-        <p>
-            <label class="form-label">Article price</label>
-            <InputNumber TValue="decimal" class="form-control" @bind-Value="Article.UnitPrice"></InputNumber>
-        </p>
-        <p>
-            <label class="form-label">Article color</label>
-            <InputText class="form-control" @bind-Value="Article.Color.Color"></InputText>
-        </p>
+<div class="container-fluid">
+    <div class="row">
+        <div style="width: 20vw">
+            <EditForm Model="Article" OnValidSubmit="AddArticleToDbAsync">
+                <DataAnnotationsValidator></DataAnnotationsValidator>
+                <p>
+                    <label class="form-label">Name</label>
+                    <InputText class="form-control" @bind-Value="Article.ArticleName"></InputText>
+                </p>
+                <p>
+                    <label class="form-label">Unit price</label>
+                    <InputNumber TValue="decimal" class="form-control" @bind-Value="Article.UnitPrice"></InputNumber>
+                </p>
+                <p>
+                    <label class="form-label">Color</label>
+                    <InputText class="form-control" @bind-Value="Article.Color.Color" placeholder="blue"></InputText>
+                </p>
+                @if (PostNewArticle)
+                {
+                    <button class="mt-3 btn btn-lg btn-outline-primary">Add New Article</button>
+                }
+                else
+                {
+                    <button class="mt-3 btn btn-lg btn-outline-success">Update Selected Article</button>
+                }
+                <ValidationSummary></ValidationSummary>
+            </EditForm>
+
+            <button class="btn btn-sm btn-outline-primary mt-4" @onclick="() => ResetChosenArticle()">Reset to add new</button>
+        </div>
+
+        <div style="width: 5vw"></div>
+
+        <div class="col">
+            <div class="row">
+                <div class="row">
+                    <div class="col-2 fw-bold">NAME</div>
+                    <div class="col-2 fw-bold">ARTICLE NUMBER</div>
+                    <div class="col-2 fw-bold">UNIT PRICE</div>
+                    <div class="col-2 fw-bold">CREATED AT</div>
+                    <div class="col-2 fw-bold">UPDATED AT</div>
+                    <div class="col-2 fw-bold">COLOR</div>
+                </div>
+
+                @* Virtualize only loads the items visible on the viewport (screen) *@
+
+                <Virtualize Items="AllArticles" Context="article">
+                    <div class="row m-1 border border-primary rounded-3 p-1" @onclick="() => SetChosenArticle(article)">
+                        <div class="col-2">
+                            <p class="fw-bold">@article.ArticleName</p>
+                        </div>
+                        <div class="col-2">
+                            <p>@article.ArticleNumber</p>
+                        </div>
+                        <div class="col-2">
+                            <p>@article.UnitPrice SEK</p>
+                        </div>
+                        <div class="col-2">
+                            <p>@article.CreatedAt.ToString("yyyy/MM/dd HH:mm")</p>
+                        </div>
+                        <div class="col-2">
+                            <p>@article.LastUpdatedAt.ToString("yyyy/MM/dd HH:mm")</p>
+                        </div>
+                        @if (article.Color is not null)
+                        {
+                            <div class="col-2">
+                                <p>@article.Color.Color</p>
+                            </div>
+                        }
+                    </div>
+                </Virtualize>
+            </div>
+        </div>
     </div>
-    <button class="btn btn-outline-primary">Add Article</button>
-    <ValidationSummary></ValidationSummary>
-</EditForm>
+</div>
+
+
 
 @code {
-    private ArticleDto Article { get; set; } = new ArticleDto();
+    private ArticleDto Article { get; set; } = new();
+    private List<ArticleDto> AllArticles { get; set; } = new List<ArticleDto>();
+    private bool PostNewArticle { get; set; } = true;
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         Article.Color = new ColorDto();
-        return base.OnInitializedAsync();
+        await SetAllArticlesAsync();
     }
 
-    private async Task AddArticleToDb()
+    private async Task SetAllArticlesAsync()
     {
-        var response = await _client.Client.PostAsJsonAsync("/article/", Article);
-        var results = await response.Content.ReadFromJsonAsync<ServiceResponse<ArticleDto>>();
+        var response = await _client.Client.GetFromJsonAsync<ServiceResponse<IReadOnlyCollection<ArticleDto>>>("/article/");
+        if (response?.Data is null || !response.Data.Any())
+        {
+            Console.WriteLine("No articles found.");
+            return;
+        }
+        AllArticles = response.Data.ToList();
+    }
+
+    private async Task AddArticleToDbAsync()
+    {
+        if (PostNewArticle)
+        {
+            var response = await _client.Client.PostAsJsonAsync("/article/", Article);
+            var results = await response.Content.ReadFromJsonAsync<ServiceResponse<ArticleDto>>();
+        }
+        else
+        {
+            var response = await _client.Client.PutAsJsonAsync("/article/", Article);
+            var results = await response.Content.ReadFromJsonAsync<ServiceResponse<ArticleDto>>();
+        }
+
+        ResetChosenArticle();
+        await SetAllArticlesAsync();
+    }
+
+    private void SetChosenArticle(ArticleDto article)
+    {
+        PostNewArticle = false;
+        article.Color ??= new ColorDto();
+
+        Article = article;
+    }
+
+    private void ResetChosenArticle()
+    {
+        Article = new ArticleDto
+            {
+                Color = new ColorDto()
+            };
+        PostNewArticle = true;
     }
 
 }

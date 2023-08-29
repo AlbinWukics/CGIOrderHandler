@@ -21,7 +21,7 @@ public class UpdateOrderRowHandler : IRequestHandler<UpdateOrderRowRequest, IRes
             return Results.NotFound();
 
         await _unitOfWork.SaveAsync();
-        return Results.Ok(response.Data);
+        return Results.Ok(response);
 
     }
 }

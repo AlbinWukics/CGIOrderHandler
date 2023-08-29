@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Connections.Features;
 using OrderHandler.DomainCommons.Services.Interfaces;
 using OrderHandler.Server.Endpoints.Requests.Article;
 
@@ -22,6 +21,6 @@ public class GetAllArticlesHandler : IRequestHandler<GetAllArticlesRequest, IRes
         if (!response.Success)
             return Results.NotFound();
 
-        return Results.Ok(response.Data);
+        return Results.Ok(response);
     }
 }

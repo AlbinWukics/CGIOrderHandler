@@ -22,6 +22,6 @@ public class UpdateArticleHandler : IRequestHandler<UpdateArticleRequest, IResul
             return Results.NotFound();
 
         await _unitOfWork.SaveAsync();
-        return Results.Ok(response.Data);
+        return Results.Ok(response);
     }
 }

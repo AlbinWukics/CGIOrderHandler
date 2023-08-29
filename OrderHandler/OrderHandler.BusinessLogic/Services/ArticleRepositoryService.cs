@@ -25,8 +25,9 @@ public class ArticleRepositoryService : IArticleRepository
         var highestArticleNumber = await _ctx.Articles.MaxAsync(a => (int?)a.ArticleNumber) ?? 10000;
         dto.ArticleNumber = highestArticleNumber + 1;
 
-        if (dto.Color is null)
+        if (dto.Color is null || string.IsNullOrWhiteSpace(dto.Color.Color))
         {
+            dto.Color = null;
             await _ctx.Articles.AddAsync(ConvertToModel(dto));
             return new ServiceResponse<ArticleDto>(true, "", dto);
         }
@@ -41,6 +42,7 @@ public class ArticleRepositoryService : IArticleRepository
 
             if (colorEntity is null)
             {
+                dto.Color.Color = dto.Color.Color.ToLower();
                 await _ctx.Articles.AddAsync(ConvertToModel(dto));
                 return new ServiceResponse<ArticleDto>(true, "", dto);
             }
@@ -48,6 +50,8 @@ public class ArticleRepositoryService : IArticleRepository
 
         var model = ConvertToModel(dto);
         model.Color = colorEntity;
+        model.Color.Color = model.Color.Color.ToLower();
+
         var entity = await _ctx.Articles.AddAsync(model);
         return new ServiceResponse<ArticleDto>(true, "", ConvertToDto(entity.Entity));
     }
@@ -80,6 +84,7 @@ public class ArticleRepositoryService : IArticleRepository
 
     public async Task<ServiceResponse<ArticleDto>> UpdateAsync(ArticleDto dto)
     {
+        //Om man ändar färg skall den skapa en ny färg, inte ändra nuvarande då den kan vara kopplad till flera som skall behålla sin nuvarande färg.
         var a = await _ctx.Articles.FindAsync(dto.Id);
         if (a is null)
             return new ServiceResponse<ArticleDto>(false, "Article not found.", null);
@@ -88,22 +93,34 @@ public class ArticleRepositoryService : IArticleRepository
         a.UnitPrice = dto.UnitPrice;
         a.LastUpdatedAt = DateTime.UtcNow;
 
-        if (dto.Color is null)
+        if (dto.Color is null || string.IsNullOrWhiteSpace(dto.Color.Color))
         {
+            a.Color = null;
             _ctx.Articles.Update(a);
             return new ServiceResponse<ArticleDto>(true, "", ConvertToDto(a));
         }
 
+        //var color = await _ctx.Colors.FindAsync(dto.Color.Id);
+        //if (color is null)
+        //{
 
-        var color = await _ctx.Colors.FindAsync(dto.Color.Id);
-        if (color is not null)
+        var color = await _ctx.Colors
+            .FirstOrDefaultAsync(x => x.Color.ToLower()
+            .Equals(dto.Color.Color.ToLower()));
+
+        if (color is null)
         {
-            a.Color = color;
+            a.Color = new ColorModel()
+            {
+                Color = dto.Color.Color.ToLower()
+            };
             _ctx.Articles.Update(a);
             return new ServiceResponse<ArticleDto>(true, "", ConvertToDto(a));
         }
+        //}
 
-        a.Color = new ColorModel() { Color = dto.Color.Color };
+        a.Color = color;
+        a.Color.Color = a.Color.Color.ToLower();
         _ctx.Articles.Update(a);
         return new ServiceResponse<ArticleDto>(true, "", ConvertToDto(a));
     }
@@ -125,8 +142,10 @@ public class ArticleRepositoryService : IArticleRepository
     public async Task<ServiceResponse<IReadOnlyCollection<ArticleDto>>> GetManyByArticleNumber(int articleNumber)
     {
         var articles = await _ctx.Articles
+            .Include(x => x.Color)
             .Where(a => a.ArticleNumber.ToString()
-                .Contains(articleNumber.ToString())).ToListAsync();
+            .Contains(articleNumber.ToString()))
+            .ToListAsync();
 
         if (!articles.Any())
             return new ServiceResponse<IReadOnlyCollection<ArticleDto>>(false, "Not found.", null);

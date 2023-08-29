@@ -20,6 +20,6 @@ public class GetManyByOrderRowNumberHandler : IRequestHandler<GetManyByOrderRowN
         if (!response.Success || response.Data is null)
             return Results.NotFound();
 
-        return Results.Ok(response.Data);
+        return Results.Ok(response);
     }
 }
