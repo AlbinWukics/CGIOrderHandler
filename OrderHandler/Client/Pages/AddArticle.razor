@@ -7,7 +7,7 @@
 
 <PageTitle>CGI Order Handler</PageTitle>
 
-<h1>Add Article</h1>
+<h1>Add & Edit Article</h1>
 
 <div class="container-fluid">
     <div class="row">
@@ -42,46 +42,56 @@
 
         <div style="width: 5vw"></div>
 
-        <div class="col">
-            <div class="row">
-                <div class="row">
-                    <div class="col-2 fw-bold">NAME</div>
-                    <div class="col-2 fw-bold">ARTICLE NUMBER</div>
-                    <div class="col-2 fw-bold">UNIT PRICE</div>
-                    <div class="col-2 fw-bold">CREATED AT</div>
-                    <div class="col-2 fw-bold">UPDATED AT</div>
-                    <div class="col-2 fw-bold">COLOR</div>
-                </div>
-
-                @* Virtualize only loads the items visible on the viewport (screen) *@
-
-                <Virtualize Items="AllArticles" Context="article">
-                    <div class="row m-1 border border-primary rounded-3 p-1" @onclick="() => SetChosenArticle(article)">
-                        <div class="col-2">
-                            <p class="fw-bold">@article.ArticleName</p>
-                        </div>
-                        <div class="col-2">
-                            <p>@article.ArticleNumber</p>
-                        </div>
-                        <div class="col-2">
-                            <p>@article.UnitPrice SEK</p>
-                        </div>
-                        <div class="col-2">
-                            <p>@article.CreatedAt.ToString("yyyy/MM/dd HH:mm")</p>
-                        </div>
-                        <div class="col-2">
-                            <p>@article.LastUpdatedAt.ToString("yyyy/MM/dd HH:mm")</p>
-                        </div>
-                        @if (article.Color is not null)
-                        {
-                            <div class="col-2">
-                                <p>@article.Color.Color</p>
-                            </div>
-                        }
-                    </div>
-                </Virtualize>
-            </div>
+        <div class="col-8">
+            <h3 class="h3">Articles</h3>
+            <table class="table table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Article number</th>
+                        <th>Unit price SEK</th>
+                        <th>Created at</th>
+                        <th>Updated at</th>
+                        <th>Color</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <Virtualize Items="AllArticles" Context="article" SpacerElement="tr">
+                        <tr @onclick="() => SetChosenArticle(article)">
+                            <td>@article.ArticleName</td>
+                            <td>@article.ArticleNumber</td>
+                            <td>@article.UnitPrice</td>
+                            <td>@article.CreatedAt.ToString("yyyy/MM/dd HH:mm")</td>
+                            <td>@article.LastUpdatedAt.ToString("yyyy/MM/dd HH:mm")</td>
+                            @if (article.Color is not null)
+                            {
+                                @if (article.Color.Color.ToLower().Contains("red"))
+                                {
+                                    <td class="table-danger">@article.Color.Color</td>
+                                }
+                                else if (article.Color.Color.ToLower().Contains("blue"))
+                                {
+                                    <td class="table-primary">@article.Color.Color</td>
+                                }
+                                else if (article.Color.Color.ToLower().Contains("yellow"))
+                                {
+                                    <td class="table-warning">@article.Color.Color</td>
+                                }
+                                else if (article.Color.Color.ToLower().Contains("green"))
+                                {
+                                    <td class="table-success">@article.Color.Color</td>
+                                }
+                                else
+                                {
+                                    <td>@article.Color.Color</td>
+                                }
+                            }
+                        </tr>
+                    </Virtualize>
+                </tbody>
+            </table>
         </div>
+
     </div>
 </div>
 
@@ -106,7 +116,7 @@
             Console.WriteLine("No articles found.");
             return;
         }
-        AllArticles = response.Data.ToList();
+        AllArticles = response.Data.OrderBy(x => x.ArticleName).ToList();
     }
 
     private async Task AddArticleToDbAsync()
@@ -142,5 +152,4 @@
             };
         PostNewArticle = true;
     }
-
 }

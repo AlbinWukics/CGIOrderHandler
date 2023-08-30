@@ -11,7 +11,7 @@ public class OrderDto
     public ICollection<OrderRowDto> OrderRows = new List<OrderRowDto>();
 
 
-    [Required, MinLength(0)]
+    [Required]
     public int OrderNumber { get; set; }
 
 

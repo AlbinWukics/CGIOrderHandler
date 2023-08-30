@@ -13,10 +13,10 @@ public class OrderRowDto
     public ArticleDto Article { get; set; } = null!;
 
 
-    [Required, MinLength(0)]
+    [Required]
     public int RowNumber { get; set; }
 
 
-    [Required, MinLength(0)]
+    [Required]
     public int AmountOfArticles { get; set; }
 }

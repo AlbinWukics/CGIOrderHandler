@@ -1,0 +1,243 @@
+﻿@page "/placeOrder"
+@using OrderHandler.Client.HttpClient
+@using OrderHandler.DomainCommons.DataTransferObjects
+@using OrderHandler.DomainCommons.Services
+
+@inject PublicClient _client;
+<PageTitle>CGI Order Handler</PageTitle>
+
+
+<div class="container-fluid">
+    <div class="row mb-5">
+
+        <div class="col-2">
+            <div class="row">
+                <h5 class="h5">Create new order</h5>
+            </div>
+            <div class="row">
+                <EditForm Model="NewOrder" OnValidSubmit="CreateNewOrderAsync">
+                    <DataAnnotationsValidator></DataAnnotationsValidator>
+                    <p>
+                        <label class="form-label">Customer name</label>
+                        <InputText class="form-control" @bind-Value="NewOrder.CustomerName"></InputText>
+                    </p>
+                    <ValidationSummary></ValidationSummary>
+                    <button class="btn btn-outline-primary btn-sm">Add new order</button>
+                </EditForm>
+            </div>
+        </div>
+
+        <div class="col-2"></div>
+
+        <div class="col-8">
+            <h3 class="h3">Orders</h3>
+            <table class="table table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th>Customer name</th>
+                        <th>Order number</th>
+                        <th>Order status</th>
+                        <th>Created at</th>
+                        <th>Updated at</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <Virtualize Items="AllOrders" Context="order" SpacerElement="tr">
+                        <tr @onclick="() => SetChosenOrder(order)">
+                            <td>@order.CustomerName</td>
+                            <td>@order.OrderNumber</td>
+                            <td>@order.Status</td>
+                            <td>@order.CreatedAt.ToString("yyyy/MM/dd HH:mm")</td>
+                            <td>@order.LastUpdatedAt.ToString("yyyy/MM/dd HH:mm")</td>
+                        </tr>
+                    </Virtualize>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-3">
+
+            <div class="row mb-5">
+                <h4 class="h4">Add article to order by choosing order, article and specify amount.</h4>
+            </div>
+
+            <div class="row">
+                <div class="col-5">
+                    <p class="fw-bold">Order number:</p>
+                </div>
+                <div class="col">
+                    @if (NewOrderRow.Order is not null && NewOrderRow.Order.OrderNumber > 0)
+                    {
+                        <label class="form-label">@NewOrderRow.Order.OrderNumber</label>
+                    }
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-5">
+                    <p class="fw-bold">Article number:</p>
+                </div>
+                <div class="col">
+                    @if (NewOrderRow.Article is not null && NewOrderRow.Article.ArticleNumber > 0)
+                    {
+                        <label class="form-label">@NewOrderRow.Article.ArticleNumber</label>
+                    }
+                </div>
+            </div>
+
+            <div class="row">
+                <EditForm Model="NewOrderRow" Context="orderRow" OnValidSubmit="CreateNewOrderRowAsync">
+                    <DataAnnotationsValidator></DataAnnotationsValidator>
+                    <p>
+                        <label class="form-label">Amount of articles</label>
+                        <InputNumber TValue="int" class="form-control" @bind-Value="NewOrderRow.AmountOfArticles"></InputNumber>
+                    </p>
+                    <ValidationSummary></ValidationSummary>
+                    @if (AllowedToCreateNewOrderRow && NewOrderRow.AmountOfArticles > 0)
+                    {
+                        <button class="btn btn-outline-primary">Place order</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline-secondary disabled">Place order</button>
+                    }
+                </EditForm>
+            </div>
+
+        </div>
+
+        <div class="col-1"></div>
+
+        <div class="col-8">
+            <h3 class="h3">Articles</h3>
+            <table class="table table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Article number</th>
+                        <th>Unit price SEK</th>
+                        <th>Created at</th>
+                        <th>Updated at</th>
+                        <th>Color</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <Virtualize Items="AllArticles" Context="article" SpacerElement="tr">
+                        <tr @onclick="() => SetChosenArticle(article)">
+                            <td>@article.ArticleName</td>
+                            <td>@article.ArticleNumber</td>
+                            <td>@article.UnitPrice</td>
+                            <td>@article.CreatedAt.ToString("yyyy/MM/dd HH:mm")</td>
+                            <td>@article.LastUpdatedAt.ToString("yyyy/MM/dd HH:mm")</td>
+                            @if (article.Color is not null)
+                            {
+                                @if (article.Color.Color.ToLower().Contains("red"))
+                                {
+                                    <td class="table-danger">@article.Color.Color</td>
+                                }
+                                else if (article.Color.Color.ToLower().Contains("blue"))
+                                {
+                                    <td class="table-primary">@article.Color.Color</td>
+                                }
+                                else if (article.Color.Color.ToLower().Contains("yellow"))
+                                {
+                                    <td class="table-warning">@article.Color.Color</td>
+                                }
+                                else if (article.Color.Color.ToLower().Contains("green"))
+                                {
+                                    <td class="table-success">@article.Color.Color</td>
+                                }
+                                else
+                                {
+                                    <td>@article.Color.Color</td>
+                                }
+                            }
+                        </tr>
+                    </Virtualize>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private OrderDto NewOrder { get; set; } = new();
+    private OrderRowDto NewOrderRow { get; set; } = new();
+    private List<ArticleDto> AllArticles { get; set; } = new();
+    private List<OrderDto> AllOrders { get; set; } = new();
+    private bool AllowedToCreateNewOrderRow { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SetAllArticlesAsync();
+        await SetAllOrdersAsync();
+
+        NewOrderRow.Article = new ArticleDto();
+        NewOrderRow.Order = new OrderDto();
+    }
+
+    private async Task SetAllOrdersAsync()
+    {
+        var response = await _client.Client.GetFromJsonAsync<ServiceResponse<IReadOnlyCollection<OrderDto>>>("/order/");
+        if (response?.Data is null || !response.Data.Any())
+        {
+            Console.WriteLine("No orders found.");
+            return;
+        }
+        AllOrders = response.Data.OrderBy(x => x.CustomerName).ToList();
+    }
+
+    private async Task SetAllArticlesAsync()
+    {
+        var response = await _client.Client.GetFromJsonAsync<ServiceResponse<IReadOnlyCollection<ArticleDto>>>("/article/");
+        if (response?.Data is null || !response.Data.Any())
+        {
+            Console.WriteLine("No articles found.");
+            return;
+        }
+        AllArticles = response.Data.OrderBy(x => x.ArticleName).ToList();
+    }
+
+    private async Task CreateNewOrderAsync()
+    {
+        var response = await _client.Client.PostAsJsonAsync("/order/", NewOrder);
+        var result = await response.Content.ReadFromJsonAsync<ServiceResponse<OrderDto>>();
+
+        NewOrder = new OrderDto();
+        await SetAllOrdersAsync();
+    }
+
+    private void SetChosenOrder(OrderDto order)
+    {
+        NewOrderRow.Order = order;
+
+        if (!string.IsNullOrWhiteSpace(NewOrderRow.Article.ArticleName))
+            AllowedToCreateNewOrderRow = true;
+    }
+
+    private void SetChosenArticle(ArticleDto article)
+    {
+        NewOrderRow.Article = article;
+
+        if (!string.IsNullOrWhiteSpace(NewOrderRow.Order.CustomerName))
+            AllowedToCreateNewOrderRow = true;
+    }
+
+    private async Task CreateNewOrderRowAsync()
+    {
+        var response = await _client.Client.PostAsJsonAsync("/orderRow/", NewOrderRow);
+        var result = await response.Content.ReadFromJsonAsync<ServiceResponse<OrderRowDto>>();
+
+        NewOrderRow = new OrderRowDto()
+            {
+                Article = new ArticleDto(),
+                Order = new OrderDto()
+            };
+    }
+
+}
