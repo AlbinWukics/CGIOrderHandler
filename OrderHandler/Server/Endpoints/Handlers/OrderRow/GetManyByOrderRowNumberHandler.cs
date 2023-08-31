@@ -13,11 +13,12 @@ public class GetManyByOrderRowNumberHandler : IRequestHandler<GetManyByOrderRowN
         _unitOfWork = unitOfWork;
     }
 
+
     public async Task<IResult> Handle(GetManyByOrderRowNumberRequest request, CancellationToken cancellationToken)
     {
         var response = await _unitOfWork.OrderRowRepository.GetManyByOrderRowNumber(request.OrderRowNumber);
 
-        if (!response.Success || response.Data is null)
+        if (!response.Success)
             return Results.NotFound();
 
         return Results.Ok(response);

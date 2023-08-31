@@ -107,7 +107,41 @@ public class OrderRowRepositoryService : IOrderRowRepository
             .ToListAsync();
 
         if (!orderRows.Any())
-            return new ServiceResponse<IReadOnlyCollection<OrderRowDto>>(false, "None found.", null);
+            return new ServiceResponse<IReadOnlyCollection<OrderRowDto>>(true, "None found.", null);
+
+        return new ServiceResponse<IReadOnlyCollection<OrderRowDto>>(true, "",
+            orderRows.Select(ConvertToDto).ToImmutableList());
+    }
+
+
+    public async Task<ServiceResponse<IReadOnlyCollection<OrderRowDto>>> GetManyByArticleNumber(int articleNumber)
+    {
+        var orderRows = await _ctx.OrderRows
+            .Include(x => x.Article)
+            .Include(x => x.Order)
+            .Where(x => x.Article.ArticleNumber.ToString()
+            .Contains(articleNumber.ToString()))
+            .ToListAsync();
+
+        if (!orderRows.Any())
+            return new ServiceResponse<IReadOnlyCollection<OrderRowDto>>(true, "None found.", null);
+
+        return new ServiceResponse<IReadOnlyCollection<OrderRowDto>>(true, "",
+            orderRows.Select(ConvertToDto).ToImmutableList());
+    }
+
+
+    public async Task<ServiceResponse<IReadOnlyCollection<OrderRowDto>>> GetManyByArticleName(string articleName)
+    {
+        var orderRows = await _ctx.OrderRows
+            .Include(x => x.Article)
+            .Include(x => x.Order)
+            .Where(x => x.Article.ArticleName.ToLower()
+            .Contains(articleName.ToLower()))
+            .ToListAsync();
+
+        if (!orderRows.Any())
+            return new ServiceResponse<IReadOnlyCollection<OrderRowDto>>(true, "None found.", null);
 
         return new ServiceResponse<IReadOnlyCollection<OrderRowDto>>(true, "",
             orderRows.Select(ConvertToDto).ToImmutableList());
@@ -116,38 +150,80 @@ public class OrderRowRepositoryService : IOrderRowRepository
 
     private OrderRowDto ConvertToDto(OrderRowModel m)
     {
-        return new OrderRowDto()
+        var dto = new OrderRowDto()
         {
             Id = m.Id,
             AmountOfArticles = m.AmountOfArticles,
             RowNumber = m.RowNumber,
             Article = new ArticleDto()
             {
-                Id = m.Article.Id
+                Id = m.Article.Id,
+                ArticleName = m.Article.ArticleName,
+                ArticleNumber = m.Article.ArticleNumber,
+                UnitPrice = m.Article.UnitPrice,
+                CreatedAt = m.Article.CreatedAt,
+                LastUpdatedAt = m.Article.LastUpdatedAt
             },
             Order = new OrderDto()
             {
                 Id = m.Order.Id,
+                CustomerName = m.Order.CustomerName,
+                OrderNumber = m.Order.OrderNumber,
+                CreatedAt = m.Order.CreatedAt,
+                LastUpdatedAt = m.Order.LastUpdatedAt,
+                Status = m.Order.Status
             }
         };
+
+        if (m.Article.Color is not null)
+        {
+            dto.Article.Color = new ColorDto()
+            {
+                Id = m.Article.Color.Id,
+                Color = m.Article.Color.Color
+            };
+        }
+
+        return dto;
     }
 
 
     private OrderRowModel ConvertToModel(OrderRowDto d)
     {
-        return new OrderRowModel()
+        var model = new OrderRowModel()
         {
             Id = d.Id,
             AmountOfArticles = d.AmountOfArticles,
             RowNumber = d.RowNumber,
             Article = new ArticleModel()
             {
-                Id = d.Article.Id
+                Id = d.Article.Id,
+                ArticleName = d.Article.ArticleName,
+                ArticleNumber = d.Article.ArticleNumber,
+                UnitPrice = d.Article.UnitPrice,
+                CreatedAt = d.Article.CreatedAt,
+                LastUpdatedAt = d.Article.LastUpdatedAt
             },
             Order = new OrderModel()
             {
                 Id = d.Order.Id,
+                CustomerName = d.Order.CustomerName,
+                OrderNumber = d.Order.OrderNumber,
+                CreatedAt = d.Order.CreatedAt,
+                LastUpdatedAt = d.Order.LastUpdatedAt,
+                Status = d.Order.Status
             }
         };
+
+        if (d.Article.Color is not null)
+        {
+            model.Article.Color = new ColorModel()
+            {
+                Id = d.Article.Color.Id,
+                Color = d.Article.Color.Color
+            };
+        }
+
+        return model;
     }
 }

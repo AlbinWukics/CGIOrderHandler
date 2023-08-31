@@ -1,0 +1,118 @@
+﻿@page "/viewData"
+@using OrderHandler.Client.HttpClient
+@using OrderHandler.DomainCommons.DataTransferObjects
+@using OrderHandler.DomainCommons.Services
+
+@inject PublicClient _client;
+<PageTitle>CGI Order Handler</PageTitle>
+
+<div class="container-fluid">
+
+    <div class="row float-start">
+        <div class="col p-1">
+            <input class="form-control" style="width:14vw" placeholder="Search by article number or name"
+            @bind-Value="SearchTextBox" @bind-Value:event="oninput" />
+        </div>
+        <div class="col p-0">
+            <button class="btn btn-outline-primary oi oi-magnifying-glass mt-2" @onclick="GetOrderRowsByArticleNumberAndName"></button>
+        </div>
+    </div>
+
+    <div class="row" style="height:5vw"></div>
+
+    <div class="row">
+        <div class="col-6">
+            <Virtualize Items="GroupedOrderRows" Context="orderRows" SpacerElement="tr">
+                <div class="row mb-5">
+                    <h3>Order number: @orderRows.Key</h3>
+                    <p>Customer name: @ReturnCustomerName(orderRows)</p>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Article</th>
+                                <th>Per Unit SEK</th>
+                                <th>Total SEK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <Virtualize Items="orderRows.Value" Context="orderRow" SpacerElement="tr">
+                                <tr>
+                                    <td>@orderRow.Article.ArticleName (@orderRow.AmountOfArticles) st</td>
+                                    <td>@orderRow.Article.UnitPrice</td>
+                                    <td>@(orderRow.AmountOfArticles * orderRow.Article.UnitPrice)</td>
+                                </tr>
+                            </Virtualize>
+                        </tbody>
+                        @*<tfoot>1
+                        <tr>
+                        <td>Total Cost:</td>
+                        <td>
+                        @(orderRows.Value
+                        .Sum(x => x.AmountOfArticles)
+                        * orderRows.Value.Sum(x => x.Article.UnitPrice))
+                        </td>
+                        </tr>
+                        </tfoot> *@
+                    </table>
+                </div>
+            </Virtualize>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    //Visa en vy för varje order med orderNr, totalbelopp, artikelnamn och antal, pris för de antalet artiklar.
+    private Dictionary<int, List<OrderRowDto>> GroupedOrderRows { get; set; } = new();
+    private string SearchTextBox { get; set; } = string.Empty;
+    private int AmountOfOrders { get; set; }
+
+
+    private async Task GetOrderRowsByArticleNumberAndName()
+    {
+        if (string.IsNullOrWhiteSpace(SearchTextBox))
+            return;
+
+        if (int.TryParse(SearchTextBox, out int result))
+        {
+            var response = await _client.Client.GetFromJsonAsync<ServiceResponse<IReadOnlyCollection<OrderRowDto>>>
+                ($"/orderRow/articleNumber/{result}");
+
+            if (response?.Data is null) return;
+
+            GroupOrderRowsByOrderId(response.Data.ToArray());
+        }
+        else
+        {
+            var response = await _client.Client.GetFromJsonAsync<ServiceResponse<IReadOnlyCollection<OrderRowDto>>>
+                ($"/orderRow/articleName/{SearchTextBox}");
+
+            if (response?.Data is null) return;
+
+            GroupOrderRowsByOrderId(response.Data.ToArray());
+        }
+
+        SetAmountOfOrders();
+    }
+
+
+    private void GroupOrderRowsByOrderId(IEnumerable<OrderRowDto> orderRows)
+    {
+        GroupedOrderRows = orderRows
+            .GroupBy(x => x.Order.OrderNumber)
+            .ToDictionary(group => group.Key, group => group.ToList());
+    }
+
+
+    private void SetAmountOfOrders()
+    {
+        AmountOfOrders = GroupedOrderRows.Keys.Count;
+    }
+
+    private string ReturnCustomerName(KeyValuePair<int, List<OrderRowDto>> orderRows)
+    {
+        var name = orderRows.Value.FirstOrDefault(x => x.Order.OrderNumber.Equals(orderRows.Key))?.Order.CustomerName;
+        return name ?? "";
+    }
+
+}

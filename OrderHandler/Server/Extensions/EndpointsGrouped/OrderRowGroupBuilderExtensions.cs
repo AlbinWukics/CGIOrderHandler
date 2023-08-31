@@ -11,6 +11,8 @@ public static class OrderRowGroupBuilderExtensions
         builder.MediateGet<GetOrderRowByIdRequest>("/{id}");
         builder.MediateGet<GetAllOrderRowsRequest>("/");
         builder.MediateGet<GetManyByOrderRowNumberRequest>("/orderRowNumber/{orderRowNumber}");
+        builder.MediateGet<GetManyOrderRowsByArticleNameRequest>("/articleName/{articleName}");
+        builder.MediateGet<GetManyOrderRowsByArticleNumberRequest>("/articleNumber/{articleNumber}");
         builder.MediatePut<UpdateOrderRowRequest>("/");
         builder.MediateDelete<RemoveOrderRowRequest>("/{id}");
 

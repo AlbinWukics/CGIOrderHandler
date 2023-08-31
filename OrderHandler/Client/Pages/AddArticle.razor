@@ -99,7 +99,7 @@
 
 @code {
     private ArticleDto Article { get; set; } = new();
-    private List<ArticleDto> AllArticles { get; set; } = new List<ArticleDto>();
+    private List<ArticleDto> AllArticles { get; set; } = new();
     private bool PostNewArticle { get; set; } = true;
 
     protected override async Task OnInitializedAsync()
