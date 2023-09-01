@@ -17,6 +17,15 @@
             <button class="btn btn-outline-primary oi oi-magnifying-glass mt-2" @onclick="GetOrderRowsByArticleNumberAndName"></button>
         </div>
     </div>
+    <div class="row">
+        <div class="col-1"></div>
+        <div class="col">
+            @if (DisplayAmountFound)
+            {
+                <label class="form-label mt-3">Found @ReturnAmountOfOrders() orders with @AmountOfUniqueArticles unique articles.</label>
+            }
+        </div>
+    </div>
 
     <div class="row" style="height:5vw"></div>
 
@@ -25,34 +34,51 @@
             <Virtualize Items="GroupedOrderRows" Context="orderRows" SpacerElement="tr">
                 <div class="row mb-5">
                     <h3>Order number: @orderRows.Key</h3>
-                    <p>Customer name: @ReturnCustomerName(orderRows)</p>
+                    <label class="form-label">Customer name: @ReturnCustomerName(orderRows)</label>
+                    <label class="form-label">Order status: @ReturnOrderStatus(orderRows)</label>
                     <table class="table table-hover">
                         <thead>
                             <tr>
                                 <th>Article</th>
+                                <th>Article number</th>
                                 <th>Per Unit SEK</th>
                                 <th>Total SEK</th>
+                                <th>Color</th>
                             </tr>
                         </thead>
                         <tbody>
                             <Virtualize Items="orderRows.Value" Context="orderRow" SpacerElement="tr">
                                 <tr>
                                     <td>@orderRow.Article.ArticleName (@orderRow.AmountOfArticles) st</td>
+                                    <td>@orderRow.Article.ArticleNumber</td>
                                     <td>@orderRow.Article.UnitPrice</td>
                                     <td>@(orderRow.AmountOfArticles * orderRow.Article.UnitPrice)</td>
+                                    @if (orderRow.Article.Color is not null)
+                                    {
+                                        @if (orderRow.Article.Color.Color.ToLower().Contains("red"))
+                                        {
+                                            <td class="table-danger">@orderRow.Article.Color.Color</td>
+                                        }
+                                        else if (orderRow.Article.Color.Color.ToLower().Contains("blue"))
+                                        {
+                                            <td class="table-primary">@orderRow.Article.Color.Color</td>
+                                        }
+                                        else if (orderRow.Article.Color.Color.ToLower().Contains("yellow"))
+                                        {
+                                            <td class="table-warning">@orderRow.Article.Color.Color</td>
+                                        }
+                                        else if (orderRow.Article.Color.Color.ToLower().Contains("green"))
+                                        {
+                                            <td class="table-success">@orderRow.Article.Color.Color</td>
+                                        }
+                                        else
+                                        {
+                                            <td>@orderRow.Article.Color.Color</td>
+                                        }
+                                    }
                                 </tr>
                             </Virtualize>
                         </tbody>
-                        @*<tfoot>1
-                        <tr>
-                        <td>Total Cost:</td>
-                        <td>
-                        @(orderRows.Value
-                        .Sum(x => x.AmountOfArticles)
-                        * orderRows.Value.Sum(x => x.Article.UnitPrice))
-                        </td>
-                        </tr>
-                        </tfoot> *@
                     </table>
                 </div>
             </Virtualize>
@@ -62,57 +88,91 @@
 </div>
 
 @code {
-    //Visa en vy för varje order med orderNr, totalbelopp, artikelnamn och antal, pris för de antalet artiklar.
     private Dictionary<int, List<OrderRowDto>> GroupedOrderRows { get; set; } = new();
     private string SearchTextBox { get; set; } = string.Empty;
-    private int AmountOfOrders { get; set; }
+    private int AmountOfUniqueArticles { get; set; }
+    private bool DisplayAmountFound { get; set; } = false;
 
 
     private async Task GetOrderRowsByArticleNumberAndName()
     {
-        if (string.IsNullOrWhiteSpace(SearchTextBox))
-            return;
+        DisplayAmountFound = true;
 
-        if (int.TryParse(SearchTextBox, out int result))
+        if (string.IsNullOrWhiteSpace(SearchTextBox))
+        {
+            NoneFoundResetValues();
+        }
+
+        else if (int.TryParse(SearchTextBox, out int result))
         {
             var response = await _client.Client.GetFromJsonAsync<ServiceResponse<IReadOnlyCollection<OrderRowDto>>>
                 ($"/orderRow/articleNumber/{result}");
 
-            if (response?.Data is null) return;
+            if (response?.Data is null)
+            {
+                NoneFoundResetValues();
+                return;
+            }
 
-            GroupOrderRowsByOrderId(response.Data.ToArray());
+            GroupOrderRowsByOrderId(response.Data.ToList());
         }
+
         else
         {
             var response = await _client.Client.GetFromJsonAsync<ServiceResponse<IReadOnlyCollection<OrderRowDto>>>
                 ($"/orderRow/articleName/{SearchTextBox}");
 
-            if (response?.Data is null) return;
+            if (response?.Data is null)
+            {
+                NoneFoundResetValues();
+                return;
+            }
 
-            GroupOrderRowsByOrderId(response.Data.ToArray());
+            GroupOrderRowsByOrderId(response.Data.ToList());
         }
+    }
 
-        SetAmountOfOrders();
+    private void NoneFoundResetValues()
+    {
+        GroupedOrderRows = new Dictionary<int, List<OrderRowDto>>();
+        AmountOfUniqueArticles = 0;
     }
 
 
-    private void GroupOrderRowsByOrderId(IEnumerable<OrderRowDto> orderRows)
+    private void GroupOrderRowsByOrderId(ICollection<OrderRowDto> orderRows)
     {
         GroupedOrderRows = orderRows
             .GroupBy(x => x.Order.OrderNumber)
             .ToDictionary(group => group.Key, group => group.ToList());
+
+        SetAmountOfUniqueArticles(orderRows);
     }
 
 
-    private void SetAmountOfOrders()
+    private int ReturnAmountOfOrders()
     {
-        AmountOfOrders = GroupedOrderRows.Keys.Count;
+        return GroupedOrderRows.Keys.Count;
     }
+
 
     private string ReturnCustomerName(KeyValuePair<int, List<OrderRowDto>> orderRows)
     {
         var name = orderRows.Value.FirstOrDefault(x => x.Order.OrderNumber.Equals(orderRows.Key))?.Order.CustomerName;
         return name ?? "";
+    }
+
+    private void SetAmountOfUniqueArticles(IEnumerable<OrderRowDto> orderRows)
+    {
+        AmountOfUniqueArticles = orderRows
+            .Select(x => x.Article.Id)
+            .Distinct()
+            .Count();
+    }
+
+    private string ReturnOrderStatus(KeyValuePair<int, List<OrderRowDto>> orderRows)
+    {
+        var orderStatus = orderRows.Value.FirstOrDefault(x => x.Order.OrderNumber.Equals(orderRows.Key))?.Order.Status;
+        return orderStatus.ToString() ?? "";
     }
 
 }

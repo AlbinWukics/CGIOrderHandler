@@ -11,7 +11,6 @@ public class ArticleDto
     public ColorDto? Color { get; set; }
 
 
-    //[Required, MinLength(0)]
     public int ArticleNumber { get; set; }
 
 
@@ -19,7 +18,6 @@ public class ArticleDto
     public string ArticleName { get; set; } = null!;
 
 
-    //[Required, Precision(precision: 11, scale: 2), MinLength(0)]
     [Required, Precision(precision: 11, scale: 2)]
     public decimal UnitPrice { get; set; }
 

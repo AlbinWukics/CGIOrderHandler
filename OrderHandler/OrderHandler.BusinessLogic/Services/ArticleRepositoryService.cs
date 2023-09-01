@@ -100,10 +100,6 @@ public class ArticleRepositoryService : IArticleRepository
             return new ServiceResponse<ArticleDto>(true, "", ConvertToDto(a));
         }
 
-        //var color = await _ctx.Colors.FindAsync(dto.Color.Id);
-        //if (color is null)
-        //{
-
         var color = await _ctx.Colors
             .FirstOrDefaultAsync(x => x.Color.ToLower()
             .Equals(dto.Color.Color.ToLower()));
@@ -117,7 +113,6 @@ public class ArticleRepositoryService : IArticleRepository
             _ctx.Articles.Update(a);
             return new ServiceResponse<ArticleDto>(true, "", ConvertToDto(a));
         }
-        //}
 
         a.Color = color;
         a.Color.Color = a.Color.Color.ToLower();

@@ -117,8 +117,9 @@ public class OrderRowRepositoryService : IOrderRowRepository
     public async Task<ServiceResponse<IReadOnlyCollection<OrderRowDto>>> GetManyByArticleNumber(int articleNumber)
     {
         var orderRows = await _ctx.OrderRows
-            .Include(x => x.Article)
             .Include(x => x.Order)
+            .Include(x => x.Article)
+            .ThenInclude(x => x.Color)
             .Where(x => x.Article.ArticleNumber.ToString()
             .Contains(articleNumber.ToString()))
             .ToListAsync();
@@ -134,8 +135,9 @@ public class OrderRowRepositoryService : IOrderRowRepository
     public async Task<ServiceResponse<IReadOnlyCollection<OrderRowDto>>> GetManyByArticleName(string articleName)
     {
         var orderRows = await _ctx.OrderRows
-            .Include(x => x.Article)
             .Include(x => x.Order)
+            .Include(x => x.Article)
+            .ThenInclude(x => x.Color)
             .Where(x => x.Article.ArticleName.ToLower()
             .Contains(articleName.ToLower()))
             .ToListAsync();
